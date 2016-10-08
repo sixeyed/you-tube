@@ -1,7 +1,7 @@
 
 Windows Containers and Docker: 101
 
-Hey, how you doing? I'm Elton and this is a 101 for Windows Containers and Docker. If you've heard the news that Docker runs natively on Windows 10 and Windows Server 2016, but all you know about Docker is they have a cool logo, then this is the walkthrough for you. I'll take 10 minutes to show you what Docker is, how to use it with Windows, and *why* it's such an important technology. And it's a great technology, Docker can improve pretty much every aspect of delivering and running software.
+Hey, how you doing? I'm Elton and this is a 101 for Windows Containers and Docker. If you've heard the news that Docker runs natively on Windows 10 and Windows Server 2016, but all you know about Docker is they have a cool logo, then this is the walkthrough for you. I'll take 15 minutes to show you what Docker is, how to use it with Windows, and *why* it's such an important technology. And it's a great technology, Docker can improve pretty much every aspect of delivering and running software.
 
 First up here's the background. Docker is an application packaging technology - you use it to create a single package which bundles up your entire application. So you can Dockerize an ASP.NET website, and what you do is build one package which has your web application with all its dependencies, plus the platform, .NET with all its dependencies, plus the host - so that's IIS, plus the operating system - and it's all in one unit.
 
@@ -23,11 +23,11 @@ The first time you run this, Docker will see that you don't have the Microsoft N
 
 The docker images command lists all the images on your machine, and here's the new one I've just built. The image is just the application package remember - there's nothing running yet, all I've done is bundle up my application.
 
-To run it I use the docker run command, giving the name of the image, and what Docker will do is create a container for my app from the image - that's an isolated sandbox where the applcation runs. Here's the output from my script and we can see a bunch of environment variables - the operating system is // and the hostname starts with //. 
+To run it I use the docker run command, giving the name of the image, and what Docker will do is create a container for my app from the image - that's an isolated sandbox where the applcation runs. Here's the output from my script and we can see a bunch of environment variables - the operating system is Windows NT and the hostname starts with B9B. 
 
-If I repeat that command, I'll get a new hostname written out - because Docker creates a new container for every run. Inside the container the app thinks it's running in a separate machine, with its own host name and IP address. 
+If I repeat that command, I'll get a new hostname written out - D53 - because Docker creates a new container for every run. Inside the container the app thinks it's running in a separate machine, with its own host name and IP address. 
 
-Okay, so we ran some containers that just did one thing and wrote out some content - so what happened to them when the PowerShell command finished? docker ps lists all the running containers, and there aren't any. Those containers ran and exited - Docker monitors the process it starts when it runs a container, which was the PowerShell script in this case. When the process ends, then the container exits.
+Okay, so we ran some containers that just did one thing and wrote out some content - so what happened to them when the PowerShell command finished? docker ps lists all the running containers, and there aren't any. Those containers ran and exited - I can see them in the exited status when I run `docker ps --all`. Docker monitors the process it starts when it runs a container, which was the PowerShell script in this case. When the process ends, then the container exits.
 
 * slides
 
@@ -50,9 +50,9 @@ The container is from the same image, so my environment script is here - but it 
 
 I can use an interactive container just like a remote machine or a VM. I can run ping and we see the container is connected to the outside world, ipconfig shows me the container has its own IP address, and hostname shows me the random ID that Docker generated for this container.
 
-In here I can do anything that the OS lets me do - this is Nano Server, so I can't install MSIs but I can check on windows features, and I could do something like install MSMQ. Interactive containers are great for navigating around to see what an image can do, or if you want to test out the steps for a Dockerfile when you build your own image. 
+In here I can do anything that the OS lets me do - this is Nano Server, so I can't install MSIs but I can check on windows services, and I could install features like DNS. Interactive containers are great for navigating around to see what an image can do, or if you want to test out the steps for a Dockerfile when you build your own image. 
 
-When I exit powershell, that's the end of the process which Docker started, so that container exits and there's nothing here in the docker ps output.
+When I exit powershell, that's the end of the process which Docker started, so that container exits and there's nothing here in the docker ps output. The terminal colours get a bit mixed up, but that's a minor thing.
 
 The last way to run a container is the one you'll use most - the background container. Again I can use the same image, there's nothing special about images that mean they have to be used in certain ways. This time I'll use the detached option, so Docker will put this container in the background.
 
@@ -90,17 +90,17 @@ We're nearly done, but we'll finish up with some real apps in action.
 
 * demo
 
-This Dockerfile is for a very simple ASP.NET Core web app, which calculates Pi. We have a familiar set of instructions - I'm starting from Microsoft's .NET Core base image, running on Windows Nano Server. Then I copy in the compiled .NET Core app from my machine into the image. The EXPOSE instruction is like a simple firewall rule for the image - it's saying the host can integrate with the container on port 5000. And then the RUN instruction just starts the asp.net core application, listening on port 5000 on any IP address.
+This Dockerfile is for a very simple ASP.NET Core web app, which calculates Pi. We have a familiar set of instructions - I'm starting from Microsoft's .NET Core base image, running on Windows Nano Server. The EXPOSE instruction is like a simple firewall rule for the image - it's saying the host can integrate with the container on port 5000. Then I set the working directory, abd copy in the compiled .NET Core app from my machine into the image.  And then the CMD instruction just starts the asp.net core application, listening on port 5000 on any IP address.
 
-I've already built this image and shared it on the public Hub. I'll start the web app in the background with docker run -d and publish port 5000 in the container to the same port on the host. That means when the host gets a request on port 5000, it will forward it to the container. The image is called sixeyed/pi-web-app:nanoserver, and this will start in a couple of seconds.
+I've already built this image and shared it on the public Hub. I'll start the web app in the background with docker run -d and publish port 5000 in the container to the same port on the host. That means when the host gets a request on port 5000, it will forward it to the container. I'll give the container a name, so I can refer to it later, and the image is called sixeyed/pi-web-app:nanoserver; this will start in a couple of seconds.
 
-`docker ps` tells me it's running, and I can browse to localhost port 5000 and see my awesome Pi app. Except I don't. There's a known limitation with the networking stack in windows which means if I'm running on the host, I can't access the port thats mapped from the container. `docker inspect` tells me the IP address of the container, so if I browse to that then I see my awesome Pi app. If this box gets an exteral request on port 5000 then it routes it to the container, but on the host I can't do that - be aware! It's only really a limitation when you're developing locall, but hopefully it will disappear with a future update.
+`docker ps` tells me it's running, and I can browse to localhost port 5000 and see my awesome Pi app. Except I don't. There's a known limitation with the networking stack in windows which means if I'm logged into the host machine, I can't access the port that's mapped from the container. `docker inspect` tells me the IP address of the container, so if I browse to that then I see my awesome Pi app. If this box gets an exteral request on port 5000 then it will route it to the container, but on the host I can't use localhost - so be aware! It's only really a limitation when you're developing locally, but hopefully it will disappear with a future update.
 
 Anyway, this is Pi to 6 decimal places, and I can change that with a query string to see Pi to 1,000 DP - the calcs are all running in .NET Core inside my Windows container. If I want to run another copy of the same app, I can do that - I need to publish to a different port, because hosts can't share ports, but I can publish this on port 5001. I need to get the container's IP address again to see it from the host, but I browse to that - it's the same app on the same host but its running in a completey independent container, which is a great way to run multiple non-production environments on one box.
 
 Even better, and this is the big finale: I can run existing full ASP.NET apps as Docker containers too. I have a blog series where I'm dockerizing Nerd Dinner, which is an old ASP.NET MVC showcase app. It was last changed on CodePlex in 2013. The Dockerfile for this is a bit more involved, because the app runs in IIS and uses SQL Server LocalDB - so there's a bunch of configuration, but it's configuration we only do once to build the image, and ultimately this is a tiny amount of work to be able to package up a three year old app and run it in Docker.
 
-The docker run command is the same, I'll publish port 8001 which the image exposes, and the image is called sixeyed/nerd-dinner:part1. This image is also on the Hub so you can run this yourself - it's a 4GB download though, so it will take a while, unless you already have the microsoft/iis base image locally. And it takes a little longer to start because the IIS windows service starts when the container runs.
+The docker run command is the same, I'll publish port 8081 which the image exposes, and the image is called sixeyed/nerd-dinner:part1. This image is also on the Hub so you can run this yourself - it's a 4GB download though, so it will take a while, unless you already have the microsoft/iis base image locally. And it takes a little longer to start because the IIS windows service starts when the container runs.
 
 But here it is, and I can now browse to port 8001 and I see the NerdDinner app. This is a legacy ASP.NET app with no code changes, running on Docker. On my machine now I have two ASP.NET Core app running in Nano Server containers, and a full ASP.NET app running in a Windows Server Core container. They're isolated and I don't have any limits so they can both use as much CPU and RAM as they need.
 
